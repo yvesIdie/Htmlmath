@@ -1,0 +1,708 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10111c">
+  <meta name="description" content="Адаптивный тренажёр по математике и математическому анализу">
+  <title>Матрица — тренажёр по математике</title>
+  <style>
+:root {
+  color-scheme: dark;
+  --bg:#10111b;
+  --rail:#141522;
+  --panel:#191a2a;
+  --line:#292a40;
+  --text:#f5f3fd;
+  --muted:#a3a5bc;
+  --purple:#ae93ff;
+  --purple-strong:#aa8bfa;
+  --mint:#72dfc2;
+  --amber:#f4bf79;
+  font-family:"Segoe UI",system-ui,sans-serif;
+  font-size:16px;
+  background:var(--bg);
+  color:var(--text);
+}
+* { box-sizing:border-box; }
+body { margin:0; min-width:320px; }
+button,input,select { font:inherit; }
+button { cursor:pointer; color:inherit; }
+button:disabled { cursor:default; opacity:.5; }
+button:focus-visible,input:focus-visible,select:focus-visible { outline:2px solid var(--purple); outline-offset:3px; }
+button, input, select { -webkit-tap-highlight-color:transparent; }
+h1,h2,p { margin:0; }
+.icon { display:inline-block; width:20px; height:20px; flex:none; vertical-align:middle; }
+.layout { min-height:100vh; }
+.sidebar { position:fixed; z-index:5; inset:0 auto 0 0; width:244px; display:flex; flex-direction:column; gap:0; background:var(--rail); border-right:1px solid #25263a; padding:29px 18px 0; overflow:auto; }
+.brand { display:flex; align-items:center; gap:12px; padding:0 7px; text-align:left; border:0; background:none; width:100%; color:#f8f6ff; font-weight:750; font-size:28px; line-height:1; letter-spacing:-.9px; }
+.brand-mark { width:41px; height:41px; border-radius:12px; background:linear-gradient(145deg,#bc9dff,#8561eb); color:#171028; display:grid; place-items:center; box-shadow:0 5px 16px #a07bfa30; flex:none; }
+.brand-mark .icon { width:27px; height:27px; stroke-width:1.95; }
+.brand small { display:block; margin-top:6px; font-size:8px; letter-spacing:.35px; color:#9698b1; font-weight:700; white-space:nowrap; }
+.nav-caption { margin:42px 11px 10px; font-size:11px; font-weight:700; letter-spacing:1.4px; color:#80829d; }
+nav { display:grid; gap:5px; }
+.nav-item { position:relative; display:flex; align-items:center; gap:12px; border:1px solid transparent; background:none; min-height:44px; padding:0 11px; border-radius:9px; text-align:left; font-size:14px; font-weight:550; color:#aeb0c6; }
+.nav-item .icon { width:19px; height:19px; }
+.nav-item:hover { background:#202137; color:#f0eaff; }
+.nav-item.active { border-color:#443963; background:#2b2345; color:#d1bcff; font-weight:650; }
+.nav-item.active::before { position:absolute; left:-19px; content:""; width:3px; height:24px; border-radius:0 3px 3px 0; background:#af8dff; }
+.nav-count { margin-left:auto; padding:2px 6px; border-radius:5px; background:#302747; color:#c7adff; }
+.daily { margin:auto 0 18px; padding:14px 12px; border:1px solid var(--line); background:#191a2a; border-radius:11px; }
+nav { margin-bottom:30px; }
+.daily-heading,.daily-count { display:flex; align-items:center; gap:8px; }
+.daily-heading { font-size:13px; }
+.daily-heading .icon { color:#b49aff; width:17px; height:17px; }
+.daily-count { margin:12px 0 8px; justify-content:space-between; font-size:13px; color:var(--muted); }
+.daily-count span:last-child { color:#b89fff; }
+.meter { height:6px; background:#2d2e43; border-radius:9px; overflow:hidden; }
+.meter span { display:block; height:100%; border-radius:9px; background:#ab8aff; }
+.identity { display:flex; align-items:center; gap:10px; min-height:66px; padding:10px 2px; border-top:1px solid #28293d; font-size:13px; }
+.identity span>small { display:block; color:#9194af; margin-top:3px; font-size:12px; }
+.avatar { width:34px; height:34px; border:1px solid #514172; background:#2c2345; color:#dbc7ff; display:grid; place-items:center; border-radius:50%; flex:none; font-size:14px; font-weight:650; }
+.profile-link { margin-left:auto; border:0; background:none; color:#9d9eb9; padding:5px; }
+.profile-link:hover { color:var(--purple); }
+.main { margin-left:244px; min-height:100vh; }
+.topbar { min-height:66px; padding:0 36px; border-bottom:1px solid #25263a; display:flex; justify-content:space-between; align-items:center; background:#12131f; }
+.top-title,.top-actions { display:flex; align-items:center; gap:12px; }
+.top-title { font-weight:620; font-size:15px; }
+.top-actions { gap:14px; }
+.streak { display:flex; min-height:34px; padding:0 11px; border:1px solid #4a3633; background:#2c2226; border-radius:8px; align-items:center; gap:6px; font-size:13px; color:#f2bb83; font-weight:600; }
+.streak .icon { width:16px; height:16px; }
+.menu-button,.mobile-scrim { display:none; }
+.content { width:min(100%,1360px); margin:0 auto; padding:30px 36px 44px; }
+.dashboard-head { margin:0 0 25px; }
+.eyebrow { display:flex; align-items:center; gap:8px; color:#b69afa; font-size:12px; font-weight:730; letter-spacing:1.35px; margin-bottom:9px; }
+.eyebrow span { width:7px; height:7px; border-radius:2px; background:#ac89ff; transform:rotate(45deg); }
+h1 { font-size:clamp(2rem,4vw,2.75rem); line-height:1.1; letter-spacing:-1.55px; }
+.dashboard-head h1 span { color:#ad87ff; }
+.dashboard-head p,.page-head p { margin-top:10px; line-height:1.5; color:var(--muted); }
+.hero { position:relative; isolation:isolate; overflow:hidden; min-height:254px; display:flex; align-items:center; padding:24px 30px; background:radial-gradient(ellipse at 90% 60%,#533780 0,transparent 67%),linear-gradient(110deg,#271b43,#352455 52%,#382862); border:1px solid #604887; border-radius:15px; }
+.hero::after { position:absolute; inset:0; z-index:-1; content:""; background:linear-gradient(90deg,#2a1e46 0%,#2a1e46cf 34%,transparent 67%); pointer-events:none; }
+#hero-plot { position:absolute; z-index:-2; width:63%; height:100%; right:0; top:0; }
+.hero-content { position:relative; z-index:1; max-width:460px; }
+.hero-tag { display:inline-flex; gap:6px; align-items:center; color:#decaff; border:1px solid #a17bd15f; border-radius:6px; background:#8b60c42b; padding:5px 8px; font-size:11px; letter-spacing:.9px; font-weight:700; }
+.hero-tag .icon { width:13px; height:13px; }
+.hero h2 { margin:10px 0 8px; font-size:clamp(1.9rem,3.7vw,2.55rem); letter-spacing:-1.25px; line-height:1.12; }
+.hero p { color:#d4c7e6; line-height:1.5; max-width:395px; font-size:15px; }
+.hero-formula { position:absolute; right:23px; bottom:18px; padding:6px 10px; border:1px solid #8664ba80; border-radius:6px; background:#302050bb; color:#eadbff; font:italic 15px Georgia,serif; }
+.button { display:inline-flex; align-items:center; justify-content:center; gap:8px; min-height:42px; border-radius:8px; border:1px solid transparent; padding:8px 16px; font-size:14px; font-weight:680; text-align:center; }
+.button .icon { width:16px; height:16px; }
+.primary,.hero-button { color:#1a102c; background:#b397ff; box-shadow:0 4px 12px #16083240; }
+.primary:hover,.hero-button:hover { background:#c8b3ff; }
+.hero-button { margin-top:18px; }
+.secondary { color:#e0d7fa; border-color:#3d3659; background:#242038; }
+.secondary:hover { background:#34284a; }
+.ghost { background:none; color:var(--muted); }
+.ghost:hover { color:#eee5ff; background:#252339; }
+.dashboard-section { margin-top:26px; }
+.section-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+.section-title h2 { font-size:21px; letter-spacing:-.4px; }
+.text-button,.inline-button { border:0; background:none; color:#c4a9ff; font-size:14px; font-weight:600; padding:5px 0; }
+.text-button:hover,.inline-button:hover { color:#e4d2ff; text-decoration:underline; }
+.panel { border:1px solid var(--line); border-radius:12px; background:var(--panel); }
+.stat-grid,.topic-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:13px; }
+.stat { min-height:118px; padding:13px 14px; }
+.stat-top { display:flex; align-items:center; gap:9px; color:#d0cce2; font-weight:550; font-size:14px; }
+.icon-badge { width:34px; height:34px; border-radius:8px; display:grid; place-items:center; flex:none; }
+.icon-badge .icon { width:18px; height:18px; }
+.violet { color:#bf9fff; background:#302448; }
+.mint { color:#76e0c3; background:#1c3738; }
+.blue { color:#98b8fa; background:#26324e; }
+.amber { color:#f1bc78; background:#3b2e2c; }
+.pink { color:#ef9ad7; background:#3f2942; }
+.stat strong { display:block; font-size:25px; line-height:1.15; margin-top:7px; letter-spacing:-.55px; }
+.stat p { margin-top:4px; color:var(--muted); font-size:13px; line-height:1.25; }
+.topic-card { display:grid; position:relative; grid-template-columns:auto 1fr; grid-template-rows:auto auto auto; gap:7px 8px; align-items:center; width:100%; padding:13px 14px; min-height:114px; text-align:left; }
+.topic-card:hover { border-color:#6d559a; background:#202035; }
+.topic-card strong,.topic-card small { grid-column:1/-1; }
+.topic-card strong { margin-top:2px; line-height:1.17; font-size:15px; }
+.topic-card small { color:var(--muted); font-size:13px; }
+.topic-status { justify-self:end; display:inline-flex; align-items:center; gap:4px; border-radius:5px; padding:4px 6px; font-size:11px; font-weight:650; background:#26263b; color:#aaaac2; white-space:nowrap; }
+.topic-status .icon { width:13px; height:13px; }
+.topic-status i { width:5px; height:5px; background:#71dfc1; border-radius:50%; }
+.topic-status.available,.topic-status.mastered { background:#203738; color:#87dfc7; }
+.page-head { margin:5px 0 25px; }
+.page-head p { max-width:750px; }
+.filters { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+.filter { background:var(--panel); border:1px solid var(--line); padding:8px 13px; border-radius:8px; font-size:14px; }
+.filter:hover,.filter.selected { border-color:#73579e; background:#30254a; color:#e2ceff; }
+.tree-grid { display:grid; position:relative; isolation:isolate; grid-template-columns:repeat(3,minmax(0,1fr)); gap:clamp(21px,5vw,70px); padding:18px; background:#141523; }
+#tree-edges { position:absolute; inset:0; width:100%; height:100%; z-index:-1; }
+.tree-branch { display:flex; gap:16px; flex-direction:column; justify-content:space-around; min-width:0; }
+.tree-branch h2,.list-panel h2,.lab-grid h2 { font-size:19px; letter-spacing:-.2px; }
+.tree-node { min-width:0; }
+.tree-node .topic-card { background:#1d1e30; }
+.requirements { display:flex; flex-wrap:wrap; gap:4px 8px; align-items:center; margin-top:5px; color:var(--muted); font-size:13px; }
+.inline-button { font-size:13px; }
+.inline-button.done { color:var(--mint); }
+.feature-card { display:flex; align-items:center; gap:14px; padding:19px; margin-bottom:14px; }
+.feature-card h2,.sprint-card h2 { font-size:22px; }
+.feature-card p,.list-panel p,.sprint-card p,.dim { color:var(--muted); line-height:1.5; }
+.feature-card p { margin-top:4px; }
+.feature-card .button,.feature-card select { margin-left:auto; flex:none; }
+.feature-card label .dim { display:block; margin-top:3px; }
+.list-panel { padding:19px; margin-top:14px; }
+.list-panel p { margin-top:8px; }
+.list-row { display:flex; justify-content:space-between; gap:12px; align-items:center; min-height:53px; padding:7px 0; border-bottom:1px solid var(--line); font-size:14px; }
+.list-row:last-child { border:0; }
+.list-row small,.list-row span { color:var(--muted); }
+.list-row small { display:block; margin-top:4px; }
+.sprint-grid,.lab-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.sprint-card { padding:22px; }
+.sprint-card h2 { margin:12px 0 6px; }
+.sprint-card .button { margin-top:17px; }
+.lab-grid { grid-template-columns:1.65fr 1fr; }
+.lab-plot,.lab-controls { padding:19px; }
+.lab-plot canvas { display:block; height:350px; width:100%; margin-top:14px; }
+.lab-controls label { display:block; margin:16px 0; }
+.lab-controls label span { display:flex; gap:8px; justify-content:space-between; font-size:14px; }
+output { color:#c5a5ff; }
+input[type=range] { width:100%; margin:8px 0 0; accent-color:#b394ff; }
+.lab-controls .button { margin-top:15px; }
+.trend canvas { width:100%; height:180px; margin-top:12px; display:block; }
+.workout { max-width:820px; margin:9px auto 0; }
+.workout-top { display:flex; justify-content:space-between; gap:12px; margin-bottom:8px; align-items:center; color:var(--muted); font-size:14px; }
+.workout-meter { margin-bottom:16px; }
+.exercise { padding:clamp(18px,4vw,34px); }
+.exercise-meta { display:flex; gap:9px; align-items:center; color:#ded6ec; font-size:14px; }
+.exercise-meta small { margin-left:auto; color:var(--muted); white-space:nowrap; }
+.exercise h1 { margin:18px 0 22px; font-size:clamp(1.45rem,3vw,2.1rem); letter-spacing:-.45px; line-height:1.32; }
+.exercise label { display:block; font-weight:650; margin-bottom:8px; font-size:14px; }
+.answer-row { display:flex; gap:9px; }
+.answer-row input,select { min-width:0; min-height:42px; border:1px solid #3b3953; background:#131422; border-radius:8px; padding:8px 12px; color:var(--text); }
+.answer-row input { flex:1; }
+.feedback { margin-top:13px; padding:10px 12px; border-radius:7px; font-size:14px; }
+.feedback.good { color:#95ecd1; background:#1f3736; }
+.feedback.bad { color:#ffc0c5; background:#3d2835; }
+.error-picker { display:flex; align-items:center; flex-wrap:wrap; gap:7px; margin-top:9px; font-size:13px; color:var(--muted); }
+.error-picker .button { min-height:32px; font-size:13px; padding:4px 8px; }
+.hint-list article { margin-top:11px; padding:11px 13px; border-radius:7px; border-left:3px solid #ad8af8; background:#24203a; font-size:14px; }
+.hint-list p { color:#d0c4e7; line-height:1.45; margin-top:4px; }
+.exercise-footer { display:flex; gap:9px; justify-content:space-between; flex-wrap:wrap; margin-top:18px; }
+.summary p { color:var(--muted); line-height:1.5; }
+.topic-dialog { width:min(550px,calc(100% - 28px)); color:var(--text); background:#1d1c2f; border:1px solid #54466f; border-radius:13px; padding:0; }
+.topic-dialog::backdrop { background:#070611b5; }
+.dialog-body { padding:22px; }
+.dialog-body h2 { margin-top:10px; }
+.dialog-body p { margin-top:10px; line-height:1.5; }
+@media(max-width:1140px) {
+  .sidebar { width:218px; }
+  .main { margin-left:218px; }
+  .topbar,.content { padding-left:25px; padding-right:25px; }
+  .stat-grid,.topic-grid { gap:10px; }
+  .stat,.topic-card { padding-left:10px; padding-right:10px; }
+  .stat-top { gap:6px; font-size:13px; }
+}
+@media(max-width:950px) {
+  .stat-grid,.topic-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  #hero-plot { width:70%; opacity:.7; }
+  .lab-grid { grid-template-columns:1fr; }
+}
+@media(max-width:720px) {
+  .sidebar { display:none; width:min(275px,88%); }
+  .sidebar.mobile-open { display:flex; }
+  .mobile-scrim { display:block; position:fixed; z-index:4; inset:0; width:100%; background:#030310aa; border:0; }
+  .main { margin:0; }
+  .menu-button { display:grid; place-items:center; border:0; background:none; color:var(--muted); padding:4px 3px; }
+  .topbar { min-height:56px; }
+  .topbar,.content { padding-left:16px; padding-right:16px; }
+  .content { padding-top:23px; }
+  .hero { padding:20px; min-height:235px; }
+  .hero-content { max-width:360px; }
+  #hero-plot { width:100%; opacity:.42; }
+  .hero::after { background:linear-gradient(90deg,#2a1e46ed,#2a1e4690 58%,transparent); }
+  .hero-formula { font-size:12px; right:9px; bottom:9px; }
+  .feature-card { flex-wrap:wrap; }
+  .tree-grid { grid-template-columns:1fr; gap:19px; padding:13px; }
+  #tree-edges { display:none; }
+  .tree-branch { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); border-bottom:1px solid var(--line); padding-bottom:12px; }
+  .tree-branch:last-child { border-bottom:0; padding-bottom:0; }
+}
+@media(max-width:390px) {
+  .tree-branch,.sprint-grid { grid-template-columns:1fr; }
+  .hero-formula { display:none; }
+  .top-actions { gap:6px; }
+  .stat-top .icon-badge { width:27px; height:27px; }
+  .topic-status { font-size:10px; padding:3px 4px; }
+}
+
+</style>
+  
+</head>
+<body>
+  <div id="app"></div>
+<script>
+const gcd = (a, b) => b ? gcd(b, a % b) : Math.abs(a);
+const fraction = (a, b) => {
+  const divisor = gcd(a, b);
+  return b === divisor ? String(a / divisor) : `${a / divisor}/${b / divisor}`;
+};
+
+const topics = [
+  {id:'arithmetic', name:'Арифметика', section:'Базовая техника', icon:'hash', color:'mint', rating:820, requirements:[], theory:'При сложении дробей сначала приведи их к общему знаменателю. При делении на дробь умножь на обратную.'},
+  {id:'algebra', name:'Алгебра', section:'Базовая техника', icon:'square', color:'blue', rating:920, requirements:[], theory:'Раскрывай скобки по распределительному закону. В линейном уравнении одинаковое действие над обеими частями сохраняет равенство.'},
+  {id:'trig', name:'Тригонометрия', section:'Базовая техника', icon:'wave', color:'amber', rating:1010, requirements:['algebra'], theory:'На единичной окружности координаты точки равны (cos x, sin x). Поэтому sin²x + cos²x = 1.'},
+  {id:'limits', name:'Пределы', section:'Математический анализ', icon:'target', color:'mint', rating:1050, requirements:[], theory:'Для непрерывной функции достаточно подставить предельное значение аргумента. Неопределённость 0/0 требует преобразования выражения.'},
+  {id:'derivatives', name:'Производные', section:'Математический анализ', icon:'function', color:'violet', rating:1120, requirements:['limits'], theory:'Производная в точке задаёт наклон касательной. Для степенной функции (xⁿ)′ = nxⁿ⁻¹, для композиции применяется цепное правило.'},
+  {id:'integrals', name:'Интегралы', section:'Математический анализ', icon:'integral', color:'amber', rating:1240, requirements:['derivatives','trig'], theory:'Определённый интеграл непрерывной функции вычисляется как F(b) − F(a), где F′ = f. Площадь ниже оси x учитывается со знаком минус.'},
+  {id:'series', name:'Числовые ряды', section:'Математический анализ', icon:'sigma', color:'blue', rating:1300, requirements:['limits'], theory:'Геометрический ряд с первым членом a и знаменателем q сходится при |q| < 1, его сумма равна a/(1 − q).'},
+  {id:'linear', name:'Линейная алгебра', section:'Высшая математика', icon:'grid', color:'blue', rating:1100, requirements:['algebra'], theory:'Определитель матрицы 2 × 2 равен ad − bc. Скалярное произведение векторов — сумма произведений соответствующих координат.'},
+  {id:'probability', name:'Теория вероятностей', section:'Высшая математика', icon:'dice', color:'pink', rating:1080, requirements:['arithmetic'], theory:'Для равновероятных исходов вероятность события равна доле благоприятных исходов. Для независимых событий вероятность пересечения равна произведению вероятностей.'},
+  {id:'multivariable', name:'Функции нескольких переменных', section:'Высшая математика', icon:'layers', color:'violet', rating:1370, requirements:['derivatives','linear'], theory:'При вычислении частной производной остальные переменные считаются постоянными. Градиент собирает все частные производные в один вектор.'}
+];
+
+const bank = [];
+function add(topic, pattern, index, difficulty, prompt, answer, direction, step, solution) {
+  bank.push({id:`${topic}-${pattern}-${index}`, topic, pattern:`${topic}-${pattern}`, difficulty, prompt, answer:String(answer), hints:[direction,step,solution]});
+}
+for (let i = 1; i <= 12; i++) {
+  const a = i + 2, b = i + 3, n = 2 + i % 4;
+  const put = (topic, pattern, offset, ...content) => add(topic, pattern, i, topics.find(t=>t.id===topic).rating + offset + Math.floor((i-1)/3)*24, ...content);
+  put('arithmetic','fraction',0,`1/${a} + 1/${b}`,fraction(a+b,a*b),'Найди общий знаменатель.',`В качестве общего знаменателя возьми ${a*b}.`,`Сложи числители: (${b} + ${a})/${a*b} = ${fraction(a+b,a*b)}.`);
+  put('arithmetic','mental',-70,`${a} × 12 − ${a} × 2`,10*a,'Вынеси общий множитель.',`Запиши ${a} × (12 − 2).`,`В скобках остаётся 10. Получаем ${a} × 10 = ${10*a}.`);
+  put('algebra','equation',0,`${a}x + ${b} = ${a*n+b}. Найди x.`,n,'Собери слагаемые с x в одной части.',`Вычти ${b} из обеих частей.`,`Получается ${a}x = ${a*n}. Делим обе части на ${a} и получаем x = ${n}.`);
+  put('algebra','log',135,`log₂(${2**a})`,a,'Логарифм — показатель степени.',`Найди k из равенства 2ᵏ = ${2**a}.`,`Число ${2**a} равно 2 в степени ${a}, поэтому ответ ${a}.`);
+  put('algebra','power',-35,`2^${a} ÷ 2^${a-n+2}`,2**(n-2),'Степени имеют одинаковое основание.',`Вычти показатели: ${a} − ${a-n+2}.`,`Получаем 2 в степени ${n-2}, то есть ${2**(n-2)}.`);
+  put('algebra','expand',25,`Найди коэффициент при x после раскрытия скобок: ${a}(x + 2) − ${b}(2x − 1).`,a-2*b,'Примени распределительный закон к обеим скобкам.',`Коэффициенты при x из первой и второй скобок равны ${a} и −${2*b}.`,`Складываем коэффициенты при x: ${a} − ${2*b} = ${a-2*b}.`);
+  const trigValues = [0,.5,1,.5,0,-.5,-1,-.5,0,.5,1,.5];
+  const angles = [0,30,90,150,180,210,270,330,360,390,450,510];
+  put('trig','circle',0,`sin(${angles[i-1]}°)`,trigValues[i-1],'Используй единичную окружность.',`Приведи угол к ${angles[i-1]%360}° и найди вертикальную координату.`,`Угол ${angles[i-1]%360}° соответствует точке с ординатой ${trigValues[i-1]}. Это значение синуса.`);
+  put('trig','identity',75,`cos² x, если sin² x = ${i}/13`,fraction(13-i,13),'Вспомни основное тригонометрическое тождество.',`Вычти ${i}/13 из единицы.`,`Из sin² x + cos² x = 1 получаем cos² x = (13 − ${i})/13 = ${fraction(13-i,13)}.`);
+  put('limits','cancel',40,`lim при x → ${a}  (x² − ${a*a})/(x − ${a})`,2*a,'Проверь, можно ли разложить числитель.',`Разложи разность квадратов: (x − ${a})(x + ${a}).`,`Для x ≠ ${a} дробь равна x + ${a}. Предел этого выражения при x → ${a} равен ${2*a}.`);
+  put('limits','infinity',90,`lim при x → +∞  (${a}x² + x)/(${b}x² + 1)`,fraction(a,b),'Сравни старшие степени числителя и знаменателя.','Раздели числитель и знаменатель на x².',`Слагаемые с 1/x и 1/x² стремятся к нулю. Остаётся ${a}/${b}.`);
+  put('limits','sine',125,`lim при x → 0  sin(${a}x)/(${b}x)`,fraction(a,b),'Вспомни предел sin t / t при t → 0.','Введи переменную t, равную аргументу синуса.',`Вынеси ${a}/${b}: под знаком предела останется sin(${a}x)/(${a}x). Этот множитель стремится к 1, поэтому ответ ${a}/${b}.`);
+  put('derivatives','power',0,`f(x) = ${a}x^${n}. Найди f′(2).`,a*n*2**(n-1),'Вспомни правило производной степени.',`f′(x) = ${a*n}x^${n-1}.`,`Подставляем x = 2: ${a*n} × 2^${n-1} = ${a*n*2**(n-1)}.`);
+  put('derivatives','chain',115,`f(x) = (${a}x + 1)². Найди f′(1).`,2*a*(a+1),'Это композиция двух функций.','Умножь производную квадрата на производную внутреннего выражения.',`f′(x) = 2(${a}x + 1) × ${a}. При x = 1 получаем ${2*a*(a+1)}.`);
+  put('derivatives','product',145,`f(x) = (x² − ${a})(${b}x + 1). Найди f′(1).`,2*(b+1)+(1-a)*b,'Используй правило производной произведения.',`При x = 1 первый множитель равен ${1-a}, а его производная равна 2.`,`По правилу (uv)′ = u′v + uv′ получаем 2 × ${b+1} + (${1-a}) × ${b} = ${2*(b+1)+(1-a)*b}.`);
+  put('integrals','power',0,`∫₀¹ ${a}x^${n} dx`,fraction(a,n+1),'Найди первообразную степенной функции.',`Подними показатель на единицу и раздели на ${n+1}.`,`Первообразная равна ${a}x^${n+1}/${n+1}. Разность её значений в 1 и 0 равна ${fraction(a,n+1)}.`);
+  put('integrals','area',110,`Найди площадь под y = ${a}x от x = 0 до x = ${n}.`,fraction(a*n*n,2),'Граница области — прямая, проходящая через начало координат.',`Площадь треугольника равна половине произведения основания ${n} и высоты ${a*n}.`,`Площадь равна ${n} × ${a*n}/2 = ${fraction(a*n*n,2)}.`);
+  put('integrals','substitution',155,`∫₀¹ 2x / (${a} + x²)² dx`,fraction(1,a*(a+1)),'Ищи выражение, производная которого уже есть в числителе.',`Замени ${a} + x² на u. Новые пределы — ${a} и ${a+1}.`,`Интегрируем u⁻². Первообразная −1/u, а разность значений на концах равна 1/${a} − 1/${a+1} = ${fraction(1,a*(a+1))}.`);
+  put('series','geometric',0,`Найди сумму ряда с первым членом ${a} и знаменателем 1/${b}.`,fraction(a*b,b-1),'Ряд геометрический, а |q| < 1.','Используй формулу a₁/(1 − q).',`Сумма равна ${a}/(1 − 1/${b}) = ${fraction(a*b,b-1)}.`);
+  put('series','partial',55,`Найди сумму первых ${a} членов: 1 + 2 + 3 + …`,a*(a+1)/2,'Ряд с постоянной разностью между соседними членами.','Сложи первый и последний члены и умножь на половину их количества.',`Сумма равна (1 + ${a}) × ${a}/2 = ${a*(a+1)/2}.`);
+  put('linear','det',0,`Найди определитель матрицы [${a}, 2; 3, ${b}].`,a*b-6,'Используй формулу для матрицы 2 × 2.','Вычти произведение элементов побочной диагонали из произведения главной.',`Определитель равен ${a} × ${b} − 2 × 3 = ${a*b-6}.`);
+  put('linear','dot',-45,`Скалярное произведение (${a}, 2) и (3, −${b})`,3*a-2*b,'Перемножь соответствующие координаты.','Первое произведение положительное, второе отрицательное.',`Результат: ${a} × 3 + 2 × (−${b}) = ${3*a-2*b}.`);
+  put('probability','outcomes',0,`В урне ${a} белых и ${b} чёрных шаров. Какова вероятность достать белый шар?`,fraction(a,a+b),'Все шары равновероятны.','Раздели число белых шаров на общее число шаров.',`Из ${a+b} исходов благоприятны ${a}. Вероятность равна ${fraction(a,a+b)}.`);
+  put('probability','independent',115,`Независимые события имеют вероятности 1/${a} и 1/${b}. Найди вероятность их пересечения.`,fraction(1,a*b),'Для независимых событий используется правило произведения.','Перемножь обе вероятности.',`Получаем 1/${a} × 1/${b} = 1/${a*b}.`);
+  put('multivariable','partial',0,`f(x,y) = ${a}x²y + y². Найди ∂f/∂x в точке (2, 1).`,4*a,'При дифференцировании по x считай y постоянной.',`Производная по x равна ${2*a}xy.`,`Подставь координаты точки: ${2*a} × 2 × 1 = ${4*a}.`);
+  put('multivariable','evaluate',-100,`f(x,y) = x² + ${a}xy − y². Найди f(2, −1).`,3-2*a,'Подставь обе координаты с учётом знака.','Квадрат −1 равен 1, а произведение 2 × (−1) равно −2.',`f(2, −1) = 4 − ${2*a} − 1 = ${3-2*a}.`);
+}
+const tasks = bank;
+const intervals = [1,3,7,21];
+const errors = {arithmetic:'Арифметическая ошибка', formula:'Забыл формулу', strategy:'Неверная стратегия'};
+const initial = () => ({rating:1000, attempts:[], reviews:{}, weak:{}, goal:5});
+
+function answerValue(value) {
+  const normalize = s => s.trim().replace(/[−–]/g,'-').replace(',', '.');
+  const input = normalize(value);
+  const numeric = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)$/;
+  const parts = input.split('/').map(part=>part.trim());
+  if (parts.length > 2 || !parts.every(part=>numeric.test(part))) return NaN;
+  if (parts.length === 2 && Number(parts[1]) === 0) return NaN;
+  return Number(parts[0]) / (parts.length === 2 ? Number(parts[1]) : 1);
+}
+function hasMastered(id, state) {
+  return new Set(state.attempts.filter(a=>a.topic===id && a.correct && !a.hints).map(a=>a.task)).size >= 3;
+}
+function isOpen(topic, state) {
+  return topic.requirements.every(req=>hasMastered(req,state));
+}
+const dayKey = (time=Date.now()) => new Date(time).toDateString();
+const reviewDate = day => {
+  const date = new Date();
+  date.setDate(date.getDate()+day);
+  date.setHours(0,0,0,0);
+  return +date;
+};
+function saveAttempt(state, task, {correct, hints, seconds, error, retry}) {
+  const expected = 1 / (1 + 10 ** ((task.difficulty - state.rating) / 400));
+  const result = correct ? Math.max(.45, 1 - .17*hints - (retry ? .23 : 0) - (seconds > 110 ? .1 : 0)) : 0;
+  state.rating = Math.max(400, Math.round(state.rating + 32*(result-expected)));
+  state.attempts.push({task:task.id, topic:task.topic, pattern:task.pattern, correct, hints:hints || (retry ? 1 : 0), seconds, time:Date.now(), rating:state.rating});
+  const previous = state.reviews[task.pattern];
+  const independent = correct && !hints && !retry;
+  if (!independent || !previous || previous.due <= Date.now()) {
+    const stage = independent && previous ? Math.min(previous.stage+1, intervals.length-1) : 0;
+    state.reviews[task.pattern] = {stage, due:reviewDate(intervals[stage]), topic:task.topic};
+  }
+  if (!correct) {
+    const weak = state.weak[task.pattern] ||= {topic:task.topic, task:task.id, total:0, reasons:{}};
+    weak.task = task.id;
+    weak.total++;
+    if (error) weak.reasons[error] = (weak.reasons[error] || 0) + 1;
+  }
+}
+function dueReviews(state) {
+  return Object.entries(state.reviews).filter(([,item])=>item.due<=Date.now()).sort((a,b)=>a[1].due-b[1].due);
+}
+function nextTask(state, session) {
+  const open = new Set(topics.filter(t=>isOpen(t,state)).map(t=>t.id));
+  const recent = new Set(state.attempts.slice(-15).map(a=>a.task));
+  const due = new Set(dueReviews(state).map(([pattern])=>pattern));
+  let pool = tasks.filter(t=>open.has(t.topic) &&
+    (session.mode!=='topic' || t.topic===session.topic) &&
+    (session.mode!=='review' || due.has(t.pattern)) &&
+    (session.mode!=='weak' || t.pattern===session.pattern) &&
+    (session.mode!=='sprint' || ['arithmetic','algebra'].includes(t.topic)));
+  const unseen = pool.filter(t=>!session.seen.includes(t.id));
+  if (unseen.length) pool = unseen;
+  const rating = state.rating;
+  const rank = t => Math.abs(t.difficulty-rating) + (recent.has(t.id) ? 180 : 0) +
+    (session.lastTopic===t.topic && session.mode==='mix' ? 500 : 0) -
+    (due.has(t.pattern) && session.mode==='mix' ? 220 : 0);
+  return pool.sort((a,b)=>rank(a)-rank(b))[0];
+}
+
+
+const shapes = {
+  logo:'<path d="M3 19 8.5 5l4 10 2.5-6.4L21 19M5 15h14"/>',
+  home:'<rect x="3.5" y="3.5" width="7" height="7" rx="1.4"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.4"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.4"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.4"/>',
+  layers:'<path d="m12 3 9 5-9 5-9-5 9-5Zm-9 9 9 5 9-5M3 16l9 5 9-5"/>',
+  tree:'<rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4m-6 4v-4h12v4"/>',
+  repeat:'<path d="m16 3 4 4-4 4M4 11V9a2 2 0 0 1 2-2h14M8 21l-4-4 4-4m12 0v2a2 2 0 0 1-2 2H4"/>',
+  bolt:'<path d="m13.5 2-9 12H11l-.5 8 9-12H13l.5-8Z"/>',
+  chart:'<path d="M4 4v16h16M8 15l4-5 3 2 5-6"/>',
+  flask:'<path d="M9 3h6m-5 0v7l-5 8a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-8V3M8 14h8"/>',
+  flag:'<path d="M5 21V4m0 1c5-4 9 4 14 0v10c-5 4-9-4-14 0"/>',
+  target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  shield:'<path d="M12 3 4.5 6v5c0 4 3.4 7.7 7.5 10 4.1-2.3 7.5-6 7.5-10V6L12 3Z"/><path d="m9 12 2 2 4-4"/>',
+  fire:'<path d="M12 22a7 7 0 0 0 7-7c0-4-3-6-4-7 0 3-2 4-2 4 0-5-3-8-4-9 0 4-4 7-4 12a7 7 0 0 0 7 7Z"/><path d="M9 18a3 3 0 0 0 6 0c0-1.5-1.5-3-3-4.5C12 16 9 16.5 9 18Z"/>',
+  function:'<path d="M16 4h-2a3 3 0 0 0-3 2.6L8.5 18a3 3 0 0 1-3 2H4m2-11h9m1 5 5 6m0-6-5 6"/>',
+  integral:'<path d="M18 4c-3-3-6-1-6.5 3l-1 10C10 21 7 23 4 20"/>',
+  sigma:'<path d="M19 5H5l7 7-7 7h14v-3M19 5v3"/>',
+  hash:'<path d="M10 3 8 21m8-18-2 18M4 9h16M3 15h16"/>',
+  square:'<path d="m4 8 8-5 8 5v8l-8 5-8-5V8Zm0 0 8 5 8-5m-8 5v8"/>',
+  grid:'<rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 3v18m6-18v18M3 9h18M3 15h18"/>',
+  wave:'<path d="M3 12c3-13 6-13 9 0s6 13 9 0"/>',
+  dice:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 8h.01m8 0h.01m-4 4h.01m-4 4h.01m8 0h.01" stroke-width="2.6"/>',
+  lock:'<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3m-4 4v3"/>',
+  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+  check:'<path d="m5 12 4 4L19 6"/>',
+  book:'<path d="M4 5h6a2 2 0 0 1 2 2v13a3 3 0 0 0-3-3H4zm16 0h-6a2 2 0 0 0-2 2v13a3 3 0 0 1 3-3h5z"/>'
+};
+const icon = (name,extra='') => `<svg class="icon ${extra}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${shapes[name]||''}</svg>`;
+const badge = (name,color) => `<span class="icon-badge ${color}">${icon(name)}</span>`;
+const byId = id => topics.find(topic=>topic.id===id);
+const app = document.querySelector('#app');
+const storageKey = 'matritsa-progress-1';
+let state = initial();
+try { state = {...state,...JSON.parse(localStorage.getItem(storageKey)||'{}')}; } catch {}
+const persist = () => { try { localStorage.setItem(storageKey,JSON.stringify(state)); } catch {} };
+const views = [
+  ['dashboard','home','Обзор'],['topics','layers','Банк задач'],['tree','tree','Дерево навыков'],['review','repeat','Повторение'],['sprint','bolt','Спринты'],['progress','chart','Прогресс'],['lab','flask','Лаборатория']
+];
+let view = 'dashboard', session, current, mobileOpen = false, filter = 'all', timer;
+const lab = {a:.65,b:.45,c:-1, x:1.5};
+const plural = (num, forms) => forms[num%100>10&&num%100<20?2:num%10===1?0:num%10>=2&&num%10<=4?1:2];
+const problemCount = n => `${n} ${plural(n,['задача','задачи','задач'])}`;
+const duration = s => s<60 ? `${s} с` : `${Math.floor(s/60)} м ${s%60} с`;
+const clock = s => `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+function streak() {
+  const days = new Set(state.attempts.map(a=>dayKey(a.time)));
+  const date = new Date();
+  if (!days.has(dayKey(+date))) date.setDate(date.getDate()-1);
+  let count=0;
+  while (days.has(dayKey(+date))) { count++; date.setDate(date.getDate()-1); }
+  return count;
+}
+function metrics() {
+  const attempts=state.attempts, total=attempts.length;
+  const correct=attempts.filter(a=>a.correct);
+  return {total, correct:correct.length, rate:total?Math.round(correct.length/total*100):null,
+    time:correct.length?Math.round(correct.reduce((sum,a)=>sum+a.seconds,0)/correct.length):null,
+    independent:correct.length?Math.round(correct.filter(a=>!a.hints).length/correct.length*100):null};
+}
+function shell(content) {
+  const today = state.attempts.filter(a=>dayKey(a.time)===dayKey()&&a.correct).length;
+  const count=streak();
+  const active = view==='train'||view==='summary'?'dashboard':view;
+  return `<div class="layout">
+    <aside class="sidebar ${mobileOpen?'mobile-open':''}" id="navigation">
+      <button class="brand" data-view="dashboard"><span class="brand-mark">${icon('logo')}</span><span>матрица<small>ТРЕНАЖЁР ПО МАТЕМАТИКЕ</small></span></button>
+      <div class="nav-caption">ОБУЧЕНИЕ</div>
+      <nav aria-label="Основная навигация">${views.map(([id,glyph,label])=>`<button data-view="${id}" class="nav-item ${active===id?'active':''}" ${active===id?'aria-current="page"':''}>${icon(glyph)}<span>${label}</span>${id==='review'&&dueReviews(state).length?`<small class="nav-count">${dueReviews(state).length}</small>`:''}</button>`).join('')}</nav>
+      <div class="daily"><div class="daily-heading">${icon('flag')}<strong>Цель на сегодня</strong></div><div class="daily-count"><span>${today} / ${state.goal} задач</span><span>${Math.min(100,Math.round(today/state.goal*100))}%</span></div><div class="meter" role="progressbar" aria-label="Цель на сегодня" aria-valuenow="${Math.min(today,state.goal)}" aria-valuemax="${state.goal}"><span style="width:${Math.min(100,today/state.goal*100)}%"></span></div></div>
+      <div class="identity"><span class="avatar">М</span><span><strong>Мой профиль</strong><small>Личный прогресс</small></span><button class="profile-link" data-view="progress" aria-label="Открыть мой прогресс">${icon('chart')}</button></div>
+    </aside>
+    ${mobileOpen?'<button class="mobile-scrim" data-action="menu" aria-label="Закрыть меню"></button>':''}
+    <main class="main"><header class="topbar"><div class="top-title"><button class="menu-button" data-action="menu" aria-label="Меню" aria-controls="navigation" aria-expanded="${mobileOpen}">${icon('menu')}</button><span>${views.find(page=>page[0]===active)?.[2]}</span></div><div class="top-actions"><span class="streak">${icon('fire')} ${count} ${plural(count,['день','дня','дней'])} подряд</span><button class="avatar top-avatar" data-view="progress" aria-label="Мой прогресс">М</button></div></header><div class="content">${content}</div></main>
+    </div>`;
+}
+const button = (label,props,variant='primary',glyph='') => `<button class="button ${variant}" ${props}>${glyph?icon(glyph):''}${label}</button>`;
+const pageHead = (title,text) => `<div class="page-head"><h1>${title}</h1><p>${text}</p></div>`;
+function statCards() {
+  const m=metrics();
+  return `<div class="stat-grid">${[
+    ['chart','violet','Рейтинг Эло',state.rating,'Адаптивная сложность'],
+    ['target','mint','Точность',m.rate===null?'—':m.rate+'%',m.total?`${m.correct} из ${m.total} ответов`:'Доля верных ответов'],
+    ['clock','blue','Среднее время',m.time===null?'—':duration(m.time),'На решённую задачу'],
+    ['shield','amber','Самостоятельность',m.independent===null?'—':m.independent+'%','Решено без подсказок']
+  ].map(([glyph,color,label,value,note])=>`<article class="stat panel"><div class="stat-top">${badge(glyph,color)}<span>${label}</span></div><strong>${value}</strong><p>${note}</p></article>`).join('')}</div>`;
+}
+function topicCard(topic) {
+  const open=isOpen(topic,state), mastered=hasMastered(topic.id,state);
+  const count=tasks.filter(t=>t.topic===topic.id).length;
+  return `<button class="topic-card panel" data-topic-info="${topic.id}">${badge(topic.icon,topic.color)}<span class="topic-status ${mastered?'mastered':open?'available':'locked'}">${mastered?icon('check'):open?'<i></i>':icon('lock')}${mastered?'Освоено':open?'Доступно':'Закрыто'}</span><strong>${topic.name}</strong><small>${problemCount(count)}</small></button>`;
+}
+function dashboard() {
+  return `<section class="dashboard-head"><div><div class="eyebrow"><span></span> ТВОЯ УЧЕБНАЯ СРЕДА</div><h1>Математика, шаг за шагом<span>.</span></h1><p>Решай задачи, разбирай ошибки и развивай математическое мышление.</p></div></section>
+  <section class="hero"><canvas id="hero-plot" aria-hidden="true"></canvas><div class="hero-content"><div class="hero-tag">${icon('bolt')} АДАПТИВНАЯ СЕССИЯ</div><h2>Тренировка дня</h2><p>5 задач из разных тем. Сложность подстроится под твой уровень, а темы будут меняться по ходу тренировки.</p>${button('Начать тренировку','data-start="mix"','hero-button','bolt')}</div><span class="hero-formula" aria-hidden="true">f(x) = x² − 2x</span></section>
+  <section class="dashboard-section"><div class="section-title"><h2>Твой прогресс</h2><button class="text-button" data-view="progress">Статистика</button></div>${statCards()}</section>
+  <section class="dashboard-section"><div class="section-title"><h2>Темы матанализа</h2><button class="text-button" data-view="topics">Все темы</button></div><div class="topic-grid dashboard-topics">${['limits','derivatives','integrals','series'].map(id=>topicCard(byId(id))).join('')}</div></section>`;
+}
+function topicView() {
+  const sections=['Базовая техника','Математический анализ','Высшая математика'];
+  return pageHead('Банк задач',`${problemCount(tasks.length)} в ${topics.length} темах. У каждой задачи есть подсказки и разбор.`)+
+    `<div class="filters" aria-label="Разделы">${['all',...sections].map(name=>`<button class="filter ${filter===name?'selected':''}" aria-pressed="${filter===name}" data-filter="${name}">${name==='all'?'Все темы':name}</button>`).join('')}</div><div class="topic-grid">${topics.filter(t=>filter==='all'||t.section===filter).map(topicCard).join('')}</div>`;
+}
+function treeView() {
+  const levels = [['arithmetic','algebra','limits'],['probability','trig','linear','derivatives'],['integrals','series','multivariable']];
+  return pageHead('Дерево навыков','Реши самостоятельно три разные задачи по теме, чтобы освоить её и открыть следующие узлы.')+
+    `<div class="tree-grid panel" id="tree-grid"><canvas id="tree-edges" aria-hidden="true"></canvas>${levels.map(level=>`<div class="tree-branch">${level.map(id=>{const t=byId(id);return `<div class="tree-node" data-node="${id}">${topicCard(t)}${t.requirements.length?`<div class="requirements">После: ${t.requirements.map(req=>`<button class="inline-button ${hasMastered(req,state)?'done':''}" data-topic-info="${req}">${byId(req).name}</button>`).join('')}</div>`:''}</div>`;}).join('')}</div>`).join('')}</div>`;
+}
+function reviewView() {
+  const due=dueReviews(state), all=Object.entries(state.reviews), weak=Object.entries(state.weak);
+  return pageHead('Повторение','Возвращайся к знакомым типам задач через 1, 3, 7 и 21 день.')+
+    `<section class="panel feature-card">${badge('repeat','violet')}<div><h2>${due.length?`${due.length} к повторению`:'На сегодня всё повторено'}</h2><p>${all.length?`${all.length} ${plural(all.length,['тип','типа','типов'])} задач в расписании. Следующая дата зависит от твоих ответов.`:'После первой тренировки здесь появится расписание повторений.'}</p></div>${due.length?button('Начать повторение','data-start="review"'):''}</section>
+    ${all.length?`<div class="panel list-panel"><h2>Расписание</h2>${all.sort((a,b)=>a[1].due-b[1].due).map(([pattern,r])=>`<div class="list-row"><div><strong>${byId(r.topic).name}</strong><small>${patternNames[pattern]}</small></div><span>${+Date.now()>=r.due?'Сегодня':new Intl.DateTimeFormat('ru',{day:'numeric',month:'long'}).format(r.due)}</span></div>`).join('')}</div>`:''}
+    <div class="panel list-panel"><h2>Банк слабых мест</h2>${weak.length?weak.map(([pattern,w])=>`<div class="list-row"><div><strong>${patternNames[pattern]}</strong><small>Ошибок: ${w.total}${Object.entries(w.reasons).map(([key,n])=>` · ${errors[key]} (${n})`).join('')}</small></div>${button('Отработать',`data-weak="${pattern}"`,'secondary')}</div>`).join(''):'<p>Здесь появятся типы задач, в которых ты ошибался.</p>'}</div>`;
+}
+const patternNames = {'arithmetic-fraction':'Сложение дробей','arithmetic-mental':'Устный счёт','algebra-equation':'Линейные уравнения','algebra-log':'Логарифмы','algebra-power':'Степени','algebra-expand':'Раскрытие скобок','trig-circle':'Единичная окружность','trig-identity':'Тригонометрическое тождество','limits-cancel':'Пределы с сокращением','limits-infinity':'Пределы на бесконечности','limits-sine':'Первый замечательный предел','derivatives-power':'Производная степени','derivatives-chain':'Цепное правило','derivatives-product':'Производная произведения','integrals-power':'Интеграл степенной функции','integrals-area':'Площадь под графиком','integrals-substitution':'Интегрирование заменой переменной','series-geometric':'Геометрический ряд','series-partial':'Сумма первых членов','linear-det':'Определитель','linear-dot':'Скалярное произведение','probability-outcomes':'Равновероятные исходы','probability-independent':'Независимые события','multivariable-partial':'Частная производная','multivariable-evaluate':'Подстановка координат'};
+function sprintView() {
+  return pageHead('Спринты','Тренируй устный счёт, дроби, уравнения, степени и логарифмы на время.')+
+    `<div class="sprint-grid">${[3,5].map(min=>`<section class="panel sprint-card">${badge('bolt',min===3?'amber':'violet')}<h2>${min===3?'3 минуты':'5 минут'}</h2><p>Решай базовые задачи в своём темпе, пока идёт обратный отсчёт.</p>${button('Начать спринт',`data-sprint="${min}"`)}</section>`).join('')}</div>`;
+}
+function progressView() {
+  const seen=state.attempts.slice(-30);
+  return pageHead('Мой прогресс','Следи за сложностью, точностью и самостоятельностью.')+statCards()+
+    `<div class="panel list-panel trend"><h2>История рейтинга</h2>${seen.length?`<canvas id="rating-plot" role="img" aria-label="График изменения рейтинга. Текущий рейтинг ${state.rating}"></canvas>`:'<p>График появится после первой задачи.</p>'}</div>
+    <div class="panel list-panel"><h2>Прогресс по темам</h2>${topics.map(t=>{const done=new Set(state.attempts.filter(a=>a.topic===t.id&&a.correct&&!a.hints).map(a=>a.task)).size;return `<div class="list-row"><strong>${t.name}</strong><span>${Math.min(done,3)} / 3 самостоятельно</span></div>`;}).join('')}</div>
+    <div class="panel feature-card">${badge('flag','violet')}<label for="daily-goal"><strong>Цель на день</strong><span class="dim">Число верных ответов</span></label><select id="daily-goal">${[3,5,10,15,20].map(n=>`<option ${n===state.goal?'selected':''} value="${n}">${n}</option>`).join('')}</select></div>`;
+}
+function labView() {
+  return pageHead('Лаборатория','Меняй коэффициенты квадратичной функции и наблюдай за графиком и касательной.')+
+    `<div class="lab-grid"><section class="panel lab-plot"><h2 id="formula"></h2><canvas id="lab-plot" aria-label="График функции и касательной" role="img"></canvas></section><section class="panel lab-controls"><h2>Параметры</h2>${[['a','Квадратичный коэффициент'],['b','Линейный коэффициент'],['c','Свободный член'],['x','Точка касания']].map(([key,label])=>`<label><span>${label} <output id="out-${key}">${lab[key]}</output></span><input type="range" aria-label="${label}" min="${key==='x'?-5:-3}" max="${key==='x'?5:3}" step=".05" value="${lab[key]}" data-slider="${key}"></label>`).join('')}<p id="slope" class="dim"></p>${button('Сбросить параметры','data-action="lab-reset"','secondary')}</section></div>`;
+}
+function start(mode,options={}) {
+  session={mode,seen:[],lastTopic:null,results:[],limit:mode==='review'?dueReviews(state).length:5,...options};
+  if (mode==='sprint') session.deadline=Date.now()+options.minutes*60000;
+  advance();
+}
+function advance() {
+  if (session.mode==='sprint'?Date.now()>=session.deadline:session.seen.length>=session.limit) { finish(); return; }
+  const task=nextTask(state,session);
+  if (!task) { finish(); return; }
+  session.seen.push(task.id);
+  session.lastTopic=task.topic;
+  current={task,start:Date.now(),hints:0,status:null,draft:'',retry:false,newError:false};
+  navigate('train');
+}
+function finish() { navigate('summary'); }
+function record(correct,error) {
+  const seconds=Math.max(1,Math.round((Date.now()-current.start)/1000));
+  saveAttempt(state,current.task,{correct,hints:current.hints,seconds,error,retry:current.retry});
+  persist();
+  session.results[session.seen.length-1]={correct,seconds,hints:current.hints||Number(current.retry)};
+}
+function trainView() {
+  const {task,hints,status}=current, topic=byId(task.topic), sprint=session.mode==='sprint';
+  const solved=status==='correct';
+  const reviewMode=session.mode==='review';
+  return `<div class="workout"><div class="workout-top"><button class="text-button" data-action="finish">Завершить сессию</button><span>${sprint?`Осталось <strong id="sprint-clock">${clock(Math.max(0,Math.ceil((session.deadline-Date.now())/1000)))}</strong>`:`Задача ${Math.min(session.seen.length,session.limit)} из ${session.limit}`}</span></div>
+  ${sprint?'':`<div class="meter workout-meter"><span style="width:${100*(session.seen.length-1)/Math.max(1,session.limit)}%"></span></div>`}
+  <section class="panel exercise"><div class="exercise-meta">${badge(sprint?'bolt':reviewMode?'repeat':'target',topic.color)}<span>${session.mode==='mix'&&!solved?'Смешанная тренировка':topic.name}</span><small>Эло ${task.difficulty}</small></div><h1>${task.prompt}</h1>
+  <form id="answer-form"><label for="answer">Твой ответ</label><div class="answer-row"><input name="answer" id="answer" autocomplete="off" inputmode="text" placeholder="Например, 3 или 1/2" ${solved?'disabled':''}>${button('Проверить',solved?'disabled type="submit"':'type="submit"')}</div></form>
+  ${status==='invalid'?'<p class="feedback bad" role="status">Введи число или дробь с ненулевым знаменателем.</p>':''}
+  ${status==='incorrect'?`<div class="feedback bad" role="status">Ответ пока неверный. Можно попробовать ещё раз.</div>${current.newError?`<div class="error-picker"><span>Где возникла ошибка?</span>${Object.entries(errors).map(([key,label])=>button(label,`data-error="${key}"`,'secondary')).join('')}</div>`:''}`:''}
+  ${solved?`<p class="feedback good" role="status">${icon('check')} Верно! Ответ: ${task.answer}</p>`:''}
+  <div class="hint-list">${task.hints.slice(0,hints).map((value,index)=>`<article><strong>${['Направление мысли','Первый шаг','Полный разбор'][index]}</strong><p>${value}</p></article>`).join('')}</div>
+  <div class="exercise-footer">${!solved&&hints<3?button(['Дай подсказку','Показать первый шаг','Показать решение'][hints],'data-action="hint"','secondary','book'):''}${solved?button('Далее','data-action="next"'):button('Пропустить','data-action="skip"','ghost')}</div></section></div>`;
+}
+function summaryView() {
+  const results=session.results;
+  const solved=results.filter(r=>r.correct);
+  return `<div class="workout"><section class="panel exercise summary">${badge('check','mint')}<h1>${session.mode==='sprint'?'Спринт завершён':'Тренировка завершена'}</h1><p>Верных ответов: ${solved.length}. Самостоятельно: ${solved.filter(r=>!r.hints).length}. Текущий рейтинг: ${state.rating}.</p><div class="exercise-footer">${button('На главную','data-view="dashboard"','secondary')}${button('Новая тренировка','data-start="mix"')}</div></section></div>`;
+}
+const viewsRender={dashboard,topics:topicView,tree:treeView,review:reviewView,sprint:sprintView,progress:progressView,lab:labView,train:trainView,summary:summaryView};
+function navigate(name) {
+  view=name;
+  mobileOpen=false;
+  render();
+  window.scrollTo(0,0);
+}
+function render() {
+  clearInterval(timer);
+  app.innerHTML=shell(viewsRender[view]());
+  if (view==='train') {
+    document.querySelector('#answer').value=current.draft;
+    if (session.mode==='sprint') timer=setInterval(()=>{
+      const remaining=Math.ceil((session.deadline-Date.now())/1000);
+      if (remaining<=0) finish();
+      else document.querySelector('#sprint-clock').textContent=clock(remaining);
+    },250);
+  }
+  draw();
+}
+function topicDialog(id) {
+  const t=byId(id), open=isOpen(t,state);
+  const dialog=document.createElement('dialog');
+  dialog.className='topic-dialog';
+  dialog.innerHTML=`<div class="dialog-body">${badge(t.icon,t.color)}<h2>${t.name}</h2><p>${t.theory}</p>${open?'':`<p class="dim">Сначала освой: ${t.requirements.filter(req=>!hasMastered(req,state)).map(req=>byId(req).name).join(', ')}.</p>`}<div class="exercise-footer">${button('Закрыть','data-action="close"','secondary')}${open?button('Решать задачи',`data-train-topic="${id}"`):''}</div></div>`;
+  app.append(dialog);
+  dialog.addEventListener('close',()=>dialog.remove(),{once:true});
+  dialog.showModal();
+}
+app.addEventListener('click',event=>{
+  const trigger=event.target.closest('button');
+  if (!trigger) return;
+  const {view:target,filter:selection,topicInfo,start:mode,sprint,trainTopic,weak,action,error}=trigger.dataset;
+  if (target) navigate(target);
+  if (selection) {filter=selection;render();}
+  if (topicInfo) topicDialog(topicInfo);
+  if (mode) start(mode);
+  if (sprint) start('sprint',{minutes:Number(sprint)});
+  if (trainTopic) start('topic',{topic:trainTopic});
+  if (weak) start('weak',{pattern:weak,limit:3});
+  if (error && current.newError) {
+    const reasons=state.weak[current.task.pattern].reasons;
+    reasons[error]=(reasons[error]||0)+1;
+    current.newError=false;
+    persist();
+    render();
+  }
+  if (action==='menu') {mobileOpen=!mobileOpen;render();}
+  if (action==='close') trigger.closest('dialog').close();
+  if (action==='hint') {current.hints++;render();}
+  if (action==='next') advance();
+  if (action==='finish') finish();
+  if (action==='skip') {
+    if (!current.retry) record(false);
+    advance();
+  }
+  if (action==='lab-reset') {Object.assign(lab,{a:.65,b:.45,c:-1,x:1.5});render();}
+});
+app.addEventListener('submit',event=>{
+  if (event.target.id!=='answer-form') return;
+  event.preventDefault();
+  if (current.status==='correct') return;
+  if (session.mode==='sprint'&&Date.now()>=session.deadline) {finish();return;}
+  const value=answerValue(current.draft);
+  if (!Number.isFinite(value)) current.status='invalid';
+  else {
+    const correct=Math.abs(value-answerValue(current.task.answer))<1e-8;
+    current.status=correct?'correct':'incorrect';
+    if (correct || !current.retry) record(correct);
+    if (!correct && !current.retry) current.newError=true;
+    if (!correct) current.retry=true;
+    else current.newError=false;
+  }
+  render();
+  if (current.status!=='correct') document.querySelector('#answer').focus();
+});
+app.addEventListener('input',event=>{
+  if (event.target.id==='answer') current.draft=event.target.value;
+  const {slider}=event.target.dataset;
+  if (slider) {lab[slider]=Number(event.target.value);document.querySelector(`#out-${slider}`).value=lab[slider];drawLab();}
+});
+app.addEventListener('change',event=>{
+  if (event.target.id==='daily-goal') {state.goal=Number(event.target.value);persist();render();document.querySelector('#daily-goal').focus();}
+});
+
+function canvasContext(id) {
+  const canvas=document.getElementById(id);
+  if (!canvas) return null;
+  const {width,height}=canvas.getBoundingClientRect(), scale=window.devicePixelRatio||1;
+  if (!width||!height) return null;
+  canvas.width=width*scale;
+  canvas.height=height*scale;
+  const ctx=canvas.getContext('2d');
+  ctx.scale(scale,scale);
+  return {ctx,width,height};
+}
+function grid(ctx,w,h,ox,oy,step,color,axis) {
+  ctx.beginPath();
+  for(let x=ox%step;x<w;x+=step){ctx.moveTo(x,0);ctx.lineTo(x,h);}
+  for(let y=oy%step;y<h;y+=step){ctx.moveTo(0,y);ctx.lineTo(w,y);}
+  ctx.strokeStyle=color;ctx.lineWidth=1;ctx.stroke();
+  ctx.beginPath();ctx.moveTo(0,oy);ctx.lineTo(w,oy);ctx.moveTo(ox,0);ctx.lineTo(ox,h);
+  ctx.strokeStyle=axis;ctx.stroke();
+}
+function curve(ctx,w,ox,oy,sx,sy,fn,color,lineWidth=2) {
+  ctx.beginPath();
+  for(let px=0;px<=w;px+=1){
+    const py=oy-sy*fn((px-ox)/sx);
+    if(px===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+  }
+  ctx.strokeStyle=color;ctx.lineWidth=lineWidth;ctx.stroke();
+}
+function drawHero(){
+  const plot=canvasContext('hero-plot');
+  if(!plot)return;
+  const {ctx,width:w,height:h}=plot;
+  const ox=w*.59,oy=h*.57,s=29;
+  grid(ctx,w,h,ox,oy,s,'#b49bff21','#b49bff63');
+  ctx.font='italic 13px Georgia';ctx.fillStyle='#c6b5fc';ctx.fillText('y',ox+9,20);ctx.fillText('x',w-19,oy-8);
+  const f=x=>x*x-2*x;
+  ctx.save();ctx.shadowBlur=18;ctx.shadowColor='#ad8aff';
+  curve(ctx,w,ox,oy,43,26,f,'#c5a9ff',2.3);
+  ctx.restore();
+  ctx.setLineDash([5,6]);curve(ctx,w,ox,oy,43,26,x=>2*x-4,'#f1e7fb79',1.3);ctx.setLineDash([]);
+  for(const x of [0,1,2]){
+    ctx.beginPath();ctx.arc(ox+x*43,oy-f(x)*26,3.7,0,Math.PI*2);ctx.fillStyle='#e8d9ff';ctx.fill();
+  }
+}
+function drawLab(){
+  const plot=canvasContext('lab-plot'); if(!plot)return;
+  const {ctx,width:w,height:h}=plot, {a,b,c,x}=lab, ox=w/2,oy=h/2,s=Math.min(w/13,h/9);
+  const f=v=>a*v*v+b*v+c;
+  const m=2*a*x+b;
+  grid(ctx,w,h,ox,oy,s,'#292d43','#5d6383');
+  ctx.setLineDash([6,5]);curve(ctx,w,ox,oy,s,s,v=>f(x)+m*(v-x),'#73dbc2');ctx.setLineDash([]);
+  curve(ctx,w,ox,oy,s,s,f,'#bb9cff',2.5);
+  ctx.beginPath();ctx.arc(ox+x*s,oy-f(x)*s,5,0,Math.PI*2);ctx.fillStyle='#f0e6ff';ctx.fill();
+  const term=(n,suffix)=>n<0?` − ${Math.abs(n)}${suffix}`:` + ${n}${suffix}`;
+  document.querySelector('#formula').textContent=`f(x) = ${a}x²${term(b,'x')}${term(c,'')}`;
+  document.querySelector('#slope').textContent=`Наклон касательной: ${Number(m.toFixed(2))}`;
+  document.querySelector('#lab-plot').setAttribute('aria-label',`График функции. Наклон касательной ${Number(m.toFixed(2))}`);
+}
+function drawRating(){
+  const plot=canvasContext('rating-plot'); if(!plot)return;
+  const {ctx,width:w,height:h}=plot;
+  const values=[state.attempts.length>30?state.attempts.at(-31).rating:1000,...state.attempts.slice(-30).map(a=>a.rating)];
+  const min=Math.min(...values)-10,max=Math.max(...values)+10;
+  const gx=44,gy=16;
+  ctx.font='12px system-ui';
+  for(let i=0;i<=4;i++){
+    const y=gy+(h-2*gy)*i/4;
+    ctx.fillStyle='#9da1ba';ctx.fillText(Math.round(max-(max-min)*i/4),0,y+3);
+    ctx.strokeStyle='#2a2d43';ctx.beginPath();ctx.moveTo(gx,y);ctx.lineTo(w-8,y);ctx.stroke();
+  }
+  ctx.beginPath();
+  values.forEach((value,index)=>{const x=gx+(w-gx-8)*index/(values.length-1),y=gy+(h-2*gy)*(max-value)/(max-min);if(index)ctx.lineTo(x,y);else ctx.moveTo(x,y);});
+  ctx.lineWidth=2.5;ctx.strokeStyle='#ad90ff';ctx.stroke();
+}
+function drawTree(){
+  const plot=canvasContext('tree-edges');
+  if(!plot)return;
+  const {ctx}=plot;
+  const bounds=document.getElementById('tree-edges').getBoundingClientRect();
+  const cards = new Map(Array.from(document.querySelectorAll('[data-node]'),node=>[node.dataset.node,node.querySelector('.topic-card').getBoundingClientRect()]));
+  for(const topic of topics){
+    const target=cards.get(topic.id);
+    for(const id of topic.requirements){
+      const source=cards.get(id);
+      const x1=source.right-bounds.left,y1=source.top+source.height/2-bounds.top;
+      const x2=target.left-bounds.left,y2=target.top+target.height/2-bounds.top;
+      const middle=(x1+x2)/2;
+      ctx.beginPath();ctx.moveTo(x1,y1);ctx.bezierCurveTo(middle,y1,middle,y2,x2,y2);
+      ctx.lineWidth=1.5;ctx.strokeStyle=hasMastered(id,state)?'#72dfc2':'#77609c';ctx.stroke();
+    }
+  }
+}
+function draw(){drawHero();drawLab();drawRating();drawTree();}
+window.addEventListener('resize',draw);
+render();
+
+</script>
+</body>
+</html>
